@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>晨读日志接龙</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e3e9f7 100%);
+            color: #333;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background-color: white;
+            border-radius: 0 0 20px 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            padding: 0 0 20px 0;
+            margin-bottom: 20px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #4a6fa5 0%, #2c3e50 100%);
+            color: white;
+            padding: 20px 20px 15px 20px;
+            border-radius: 0 0 20px 20px;
+            text-align: center;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #ff9800, #e91e63, #2196f3);
+        }
+        
+        .date {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-bottom: 8px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 15px;
+        }
+        
+        .icons-header {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .icon-header-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .icon-header {
+            font-size: 1.8rem;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .icon-header:hover {
+            transform: scale(1.1);
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .icon-header.sun {
+            color: #ff9800;
+        }
+        
+        .icon-header.heart {
+            color: #e91e63;
+        }
+        
+        .icon-header.coffee {
+            color: #2196f3;
+        }
+        
+        .icon-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        .time-reminder {
+            background-color: #fff8e1;
+            padding: 12px;
+            text-align: center;
+            margin: 0 20px 20px 20px;
+            font-weight: bold;
+            color: #ff9800;
+            border-radius: 10px;
+            border: 1px solid #ffecb3;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .employee-list {
+            width: 100%;
+            padding: 0 20px;
+        }
+        
+        .employee-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background-color 0.2s;
+        }
+        
+        .employee-item:last-child {
+            border-bottom: none;
+        }
+        
+        .employee-item:hover {
+            background-color: #f9f9f9;
+        }
+        
+        .employee-number {
+            font-weight: bold;
+            color: #4a6fa5;
+            width: 50px;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+        
+        .employee-name {
+            flex: 1;
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+        
+        .employee-icons {
+            display: flex;
+            gap: 15px;
+            margin-left: 10px;
+        }
+        
+        .status-icon {
+            font-size: 1.6rem;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+        
+        /* 太阳图标 - 未选中状态（灰色） */
+        .status-icon.sun {
+            color: #cccccc;
+            background-color: #f9f9f9;
+            border: 2px solid #eeeeee;
+        }
+        
+        /* 太阳图标 - 选中状态（金色） */
+        .status-icon.sun.active {
+            color: #ff9800;
+            background-color: #fff8e1;
+            border-color: #ff9800;
+            box-shadow: 0 4px 12px rgba(255, 152, 0, 0.3);
+            transform: scale(1.1);
+        }
+        
+        /* 爱心图标 - 未选中状态（灰色） */
+        .status-icon.heart {
+            color: #cccccc;
+            background-color: #f9f9f9;
+            border: 2px solid #eeeeee;
+        }
+        
+        /* 爱心图标 - 选中状态（红色） */
+        .status-icon.heart.active {
+            color: #e91e63;
+            background-color: #fce4ec;
+            border-color: #e91e63;
+            box-shadow: 0 4px 12px rgba(233, 30, 99, 0.3);
+            transform: scale(1.1);
+        }
+        
+        /* 咖啡图标 - 未选中状态（灰色） */
+        .status-icon.coffee {
+            color: #cccccc;
+            background-color: #f9f9f9;
+            border: 2px solid #eeeeee;
+        }
+        
+        /* 咖啡图标 - 选中状态（亮蓝色） */
+        .status-icon.coffee.active {
+            color: #2196f3;
+            background-color: #e3f2fd;
+            border-color: #2196f3;
+            box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+            transform: scale(1.1);
+        }
+        
+        .status-icon::after {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .status-icon.active::after {
+            border-color: currentColor;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .coffee-copy-area {
+            background-color: #f5f5f5;
+            padding: 15px 20px;
+            margin: 20px 20px 0 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .coffee-copy-area p {
+            margin-bottom: 10px;
+            color: #666;
+            font-size: 0.95rem;
+        }
+        
+        .coffee-copy-text {
+            background-color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            border: 1px dashed #795548;
+            color: #795548;
+            font-size: 1.2rem;
+            display: inline-block;
+            cursor: pointer;
+            user-select: all;
+            transition: all 0.3s;
+        }
+        
+        .coffee-copy-text:hover {
+            background-color: #f9f9f9;
+            transform: translateY(-2px);
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            padding: 0 20px;
+            margin-top: 25px;
+        }
+        
+        .action-btn {
+            flex: 1;
+            padding: 16px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .copy-btn {
+            background: linear-gradient(to right, #4a6fa5, #2c3e50);
+            color: white;
+        }
+        
+        .reset-btn {
+            background-color: #f5f5f5;
+            color: #666;
+            border: 1px solid #ddd;
+        }
+        
+        .action-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .action-btn:active {
+            transform: translateY(0);
+        }
+        
+        .instructions {
+            background-color: #e8f4fd;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 20px 0 20px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        
+        .instructions h3 {
+            color: #4a6fa5;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .instructions ul {
+            padding-left: 20px;
+        }
+        
+        .instructions li {
+            margin-bottom: 8px;
+        }
+        
+        .footer {
+            text-align: center;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            margin-top: 15px;
+            padding: 15px 20px 0 20px;
+            border-top: 1px solid #eee;
+            width: 100%;
+            max-width: 600px;
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                border-radius: 0 0 15px 15px;
+            }
+            
+            .header {
+                border-radius: 0 0 15px 15px;
+                padding: 15px 15px 10px 15px;
+            }
+            
+            .date {
+                font-size: 1.5rem;
+            }
+            
+            .subtitle {
+                font-size: 1rem;
+            }
+            
+            .icons-header {
+                gap: 20px;
+            }
+            
+            .icon-header {
+                width: 45px;
+                height: 45px;
+                font-size: 1.6rem;
+            }
+            
+            .employee-list {
+                padding: 0 15px;
+            }
+            
+            .employee-item {
+                padding: 12px 0;
+            }
+            
+            .employee-number {
+                width: 40px;
+                font-size: 1rem;
+            }
+            
+            .employee-name {
+                font-size: 1rem;
+            }
+            
+            .employee-icons {
+                gap: 10px;
+            }
+            
+            .status-icon {
+                width: 36px;
+                height: 36px;
+                font-size: 1.4rem;
+            }
+            
+            .coffee-copy-area, .instructions, .action-buttons {
+                padding-left: 15px;
+                padding-right: 15px;
+            }
+        }
+        
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            display: none;
+            font-weight: bold;
+            animation: fadeInOut 3s ease-in-out;
+        }
+        
+        .coffee-toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #795548;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            display: none;
+            font-weight: bold;
+            animation: fadeInOut 3s ease-in-out;
+        }
+        
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translateX(-50%) translateY(20px); }
+            10% { opacity: 1; transform: translateX(-50%) translateY(0); }
+            90% { opacity: 1; transform: translateX(-50%) translateY(0); }
+            100% { opacity: 0; transform: translateX(-50%) translateY(20px); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="date" id="currentDate">2026年2月24日(周二)</div>
+            <div class="subtitle">落地举措2项打卡第<span id="dayCount">27</span>天</div>
+            
+            <div class="icons-header">
+                <div class="icon-header-item">
+                    <div class="icon-header sun" title="日志[☀️] - 点击查看说明">☀️</div>
+                    <div class="icon-label">日志</div>
+                </div>
+                <div class="icon-header-item">
+                    <div class="icon-header heart" title="晨读[❤️] - 点击查看说明">❤️</div>
+                    <div class="icon-label">晨读</div>
+                </div>
+                <div class="icon-header-item">
+                    <div class="icon-header coffee" title="请假[☕] - 点击复制请假图标">☕</div>
+                    <div class="icon-label">请假</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="time-reminder">
+            <i class="fas fa-clock"></i> 每天9:00前发送
+        </div>
+        
+        <div class="employee-list" id="employeeList">
+            <!-- 员工列表会通过JavaScript动态生成 -->
+        </div>
+        
+        <div class="coffee-copy-area">
+            <p>请假员工请复制下方请假图标，粘贴到自己名字后面</p>
+            <div class="coffee-copy-text" id="coffeeCopyText">[☕]</div>
+        </div>
+        
+        <div class="action-buttons">
+            <button class="action-btn reset-btn" id="resetBtn">
+                <i class="fas fa-redo"></i> 重置
+            </button>
+            <button class="action-btn copy-btn" id="copyBtn">
+                <i class="fas fa-copy"></i> 复制接龙
+            </button>
+        </div>
+        
+        <div class="instructions">
+            <h3><i class="fas fa-info-circle"></i> 使用说明</h3>
+            <ul>
+                <li><strong>打卡方式：</strong>点击员工名字旁边的灰色图标，选中后变为亮色</li>
+                <li><strong>图标颜色：</strong>太阳☀️(金色) | 爱心❤️(红色) | 咖啡☕(蓝色)</li>
+                <li><strong>请假操作：</strong>如需请假，请复制上方请假图标"[☕]"粘贴到名字后面</li>
+                <li><strong>接龙生成：</strong>完成选择后点击"复制接龙"按钮，粘贴到微信群</li>
+                <li><strong>日期自动更新：</strong>每天自动显示当天日期和星期</li>
+                <li><strong>打卡天数：</strong>从2026年1月29日开始自动计算</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <p>公司晨读日志接龙系统 | 微信小程序优化版 | 操作更简便</p>
+    </div>
+    
+    <div class="toast" id="toast">接龙内容已复制到剪贴板！</div>
+    <div class="coffee-toast" id="coffeeToast">请假图标"[☕]"已复制！</div>
+
+    <script>
+        // 员工名单
+        const employees = [
+            "李正羽", "陈志铭", "李    杰", "范    文", "郝    彤", 
+            "赵    鹏", "楚雪纯", "徐博文", "邸庆波", "李    菲", 
+            "岳建兴", "杨洪柳", "张智博", "李庆冕", "张新颖", 
+            "姚晓彤", "冯    敏", "高俊霞"
+        ];
+        
+        // 存储员工状态：[日志状态, 晨读状态, 请假状态]
+        // 每位员工的状态数组：[sun, heart, coffee]
+        // 0=未完成，1=已完成
+        let employeeStatus = new Array(employees.length).fill([0, 0, 0]);
+        
+        // 获取当前日期
+        function getCurrentDate() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = now.getMonth() + 1;
+            const day = now.getDate();
+            
+            // 获取星期几
+            const weekdays = ["日", "一", "二", "三", "四", "五", "六"];
+            const weekday = weekdays[now.getDay()];
+            
+            return `${year}年${month}月${day}日(周${weekday})`;
+        }
+        
+        // 计算打卡天数（从2026年1月29日开始算第1天）
+        function getDayCount() {
+            const startDate = new Date(2026, 0, 29); // 2026年1月29日
+            const currentDate = new Date();
+            
+            // 计算两个日期之间的天数差
+            const timeDiff = currentDate.getTime() - startDate.getTime();
+            const dayDiff = Math.floor(timeDiff / (1000 * 3600 * 24));
+            
+            // 返回第几天（至少为1）
+            return Math.max(1, dayDiff + 1);
+        }
+        
+        // 更新日期显示 - 每天自动更新
+        function updateDate() {
+            document.getElementById('currentDate').textContent = getCurrentDate();
+            document.getElementById('dayCount').textContent = getDayCount();
+        }
+        
+        // 初始化员工列表
+        function initEmployeeList() {
+            const employeeList = document.getElementById('employeeList');
+            employeeList.innerHTML = '';
+            
+            employees.forEach((employee, index) => {
+                const employeeItem = document.createElement('div');
+                employeeItem.className = 'employee-item';
+                employeeItem.dataset.index = index;
+                
+                // 员工编号（两位数格式）
+                const number = document.createElement('div');
+                number.className = 'employee-number';
+                number.textContent = (index + 1).toString().padStart(2, '0') + '.';
+                
+                // 员工姓名
+                const name = document.createElement('div');
+                name.className = 'employee-name';
+                name.textContent = employee;
+                
+                // 图标容器
+                const iconsContainer = document.createElement('div');
+                iconsContainer.className = 'employee-icons';
+                
+                // 太阳图标（日志）
+                const sunIcon = document.createElement('div');
+                sunIcon.className = 'status-icon sun';
+                sunIcon.innerHTML = '☀️';
+                sunIcon.title = '点击标记日志完成';
+                sunIcon.dataset.type = 'sun';
+                
+                // 爱心图标（晨读）
+                const heartIcon = document.createElement('div');
+                heartIcon.className = 'status-icon heart';
+                heartIcon.innerHTML = '❤️';
+                heartIcon.title = '点击标记晨读完成';
+                heartIcon.dataset.type = 'heart';
+                
+                // 咖啡图标（请假）
+                const coffeeIcon = document.createElement('div');
+                coffeeIcon.className = 'status-icon coffee';
+                coffeeIcon.innerHTML = '☕';
+                coffeeIcon.title = '点击标记请假';
+                coffeeIcon.dataset.type = 'coffee';
+                
+                // 将元素添加到员工项
+                iconsContainer.appendChild(sunIcon);
+                iconsContainer.appendChild(heartIcon);
+                iconsContainer.appendChild(coffeeIcon);
+                
+                employeeItem.appendChild(number);
+                employeeItem.appendChild(name);
+                employeeItem.appendChild(iconsContainer);
+                
+                employeeList.appendChild(employeeItem);
+            });
+            
+            // 添加图标点击事件
+            addIconClickEvents();
+            
+            // 初始化状态显示
+            updateStatusDisplay();
+        }
+        
+        // 添加图标点击事件
+        function addIconClickEvents() {
+            document.querySelectorAll('.status-icon').forEach(icon => {
+                icon.addEventListener('click', function() {
+                    const employeeItem = this.closest('.employee-item');
+                    const employeeIndex = parseInt(employeeItem.dataset.index);
+                    const type = this.dataset.type;
+                    
+                    toggleStatus(employeeIndex, type);
+                });
+            });
+        }
+        
+        // 切换员工状态
+        function toggleStatus(employeeIndex, type) {
+            // 获取当前状态
+            const currentStatus = [...employeeStatus[employeeIndex]];
+            let typeIndex = 0;
+            
+            // 确定类型索引
+            if (type === 'sun') typeIndex = 0;
+            else if (type === 'heart') typeIndex = 1;
+            else if (type === 'coffee') typeIndex = 2;
+            
+            // 如果是咖啡图标，点击时选中，再次点击取消
+            if (type === 'coffee') {
+                // 咖啡只能单独选择，不能与其他同时选择
+                if (currentStatus[typeIndex] === 0) {
+                    // 选中咖啡，取消其他
+                    currentStatus[0] = 0; // 取消太阳
+                    currentStatus[1] = 0; // 取消爱心
+                    currentStatus[2] = 1; // 选中咖啡
+                } else {
+                    // 取消咖啡
+                    currentStatus[2] = 0;
+                }
+            } else {
+                // 太阳和爱心可以多选，但不能与咖啡同时选择
+                if (currentStatus[typeIndex] === 0) {
+                    // 选中当前图标
+                    currentStatus[typeIndex] = 1;
+                    // 如果选中太阳或爱心，取消咖啡
+                    if (typeIndex === 0 || typeIndex === 1) {
+                        currentStatus[2] = 0;
+                    }
+                } else {
+                    // 取消当前图标
+                    currentStatus[typeIndex] = 0;
+                }
+            }
+            
+            // 保存状态
+            employeeStatus[employeeIndex] = currentStatus;
+            
+            // 更新显示
+            updateStatusDisplay();
+            
+            // 保存到本地存储
+            saveToLocalStorage();
+        }
+        
+        // 更新状态显示
+        function updateStatusDisplay() {
+            document.querySelectorAll('.employee-item').forEach((item, index) => {
+                const status = employeeStatus[index];
+                const icons = item.querySelectorAll('.status-icon');
+                
+                // 更新太阳图标
+                if (status[0] === 1) {
+                    icons[0].classList.add('active');
+                } else {
+                    icons[0].classList.remove('active');
+                }
+                
+                // 更新爱心图标
+                if (status[1] === 1) {
+                    icons[1].classList.add('active');
+                } else {
+                    icons[1].classList.remove('active');
+                }
+                
+                // 更新咖啡图标
+                if (status[2] === 1) {
+                    icons[2].classList.add('active');
+                } else {
+                    icons[2].classList.remove('active');
+                }
+            });
+        }
+        
+        // 生成接龙文本
+        function generateRollCallText() {
+            const date = getCurrentDate();
+            const dayCount = getDayCount();
+            
+            let text = `${date}\n`;
+            text += `落地举措2项打卡第${dayCount}天\n`;
+            text += `日志[☀️] 晨读[❤️]请假[☕]\n`;
+            text += `每天9:00前发送\n`;
+            
+            employees.forEach((employee, index) => {
+                const number = (index + 1).toString().padStart(2, '0');
+                const status = employeeStatus[index];
+                
+                // 生成状态图标
+                let statusIcons = '';
+                
+                if (status[2] === 1) { // 请假状态优先
+                    statusIcons = '[☕]';
+                } else {
+                    if (status[0] === 1) { // 日志完成
+                        statusIcons += '[☀️]';
+                    }
+                    
+                    if (status[1] === 1) { // 晨读完成
+                        statusIcons += '[❤️]';
+                    }
+                }
+                
+                text += `${number}.${employee}${statusIcons}\n`;
+            });
+            
+            return text;
+        }
+        
+        // 复制到剪贴板
+        function copyToClipboard() {
+            const text = generateRollCallText();
+            
+            // 使用现代剪贴板API
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('接龙内容已复制到剪贴板！');
+            }).catch(err => {
+                // 备用方法：使用textarea
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showToast('接龙内容已复制到剪贴板！');
+            });
+        }
+        
+        // 复制请假图标
+        function copyCoffeeIcon() {
+            const coffeeIcon = '[☕]';
+            
+            navigator.clipboard.writeText(coffeeIcon).then(() => {
+                showCoffeeToast('请假图标"[☕]"已复制！');
+            }).catch(err => {
+                // 备用方法
+                const textArea = document.createElement('textarea');
+                textArea.value = coffeeIcon;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showCoffeeToast('请假图标"[☕]"已复制！');
+            });
+        }
+        
+        // 重置所有选择
+        function resetAllSelections() {
+            if (confirm('确定要重置所有选择吗？所有员工的打卡状态将被清空。')) {
+                employeeStatus = new Array(employees.length).fill([0, 0, 0]);
+                updateStatusDisplay();
+                localStorage.removeItem('rollCallStatus');
+                showToast('已重置所有选择！');
+            }
+        }
+        
+        // 保存到本地存储
+        function saveToLocalStorage() {
+            try {
+                // 获取今天的日期作为key的一部分，确保每天数据独立
+                const today = new Date().toDateString();
+                localStorage.setItem(`rollCallStatus_${today}`, JSON.stringify(employeeStatus));
+            } catch (e) {
+                console.log('本地存储失败:', e);
+            }
+        }
+        
+        // 从本地存储加载
+        function loadFromLocalStorage() {
+            try {
+                // 获取今天的日期
+                const today = new Date().toDateString();
+                const savedStatus = localStorage.getItem(`rollCallStatus_${today}`);
+                
+                if (savedStatus) {
+                    employeeStatus = JSON.parse(savedStatus);
+                }
+            } catch (e) {
+                console.log('本地存储加载失败:', e);
+            }
+        }
+        
+        // 显示提示消息
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.style.display = 'block';
+            
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 3000);
+        }
+        
+        // 显示请假图标复制提示
+        function showCoffeeToast(message) {
+            const toast = document.getElementById('coffeeToast');
+            toast.textContent = message;
+            toast.style.display = 'block';
+            
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 3000);
+        }
+        
+        // 显示图标说明
+        function showIconInfo(type) {
+            let message = '';
+            if (type === 'sun') {
+                message = '太阳图标 ☀️ 代表"日志完成"\n点击后变为金色表示已完成';
+            } else if (type === 'heart') {
+                message = '爱心图标 ❤️ 代表"晨读完成"\n点击后变为红色表示已完成';
+            } else if (type === 'coffee') {
+                message = '咖啡图标 ☕ 代表"请假"\n点击后变为蓝色表示请假\n请假与日志/晨读不能同时选择';
+            }
+            alert(message);
+        }
+        
+        // 初始化页面
+        function initPage() {
+            // 更新日期（每天自动更新）
+            updateDate();
+            
+            // 从本地存储加载之前的状态
+            loadFromLocalStorage();
+            
+            initEmployeeList();
+            
+            // 设置复制按钮事件
+            document.getElementById('copyBtn').addEventListener('click', copyToClipboard);
+            
+            // 设置重置按钮事件
+            document.getElementById('resetBtn').addEventListener('click', resetAllSelections);
+            
+            // 设置请假图标复制事件
+            document.getElementById('coffeeCopyText').addEventListener('click', copyCoffeeIcon);
+            document.querySelector('.icon-header.coffee').addEventListener('click', copyCoffeeIcon);
+            
+            // 设置说明图标点击事件
+            document.querySelector('.icon-header.sun').addEventListener('click', () => showIconInfo('sun'));
+            document.querySelector('.icon-header.heart').addEventListener('click', () => showIconInfo('heart'));
+            document.querySelector('.icon-header.coffee').addEventListener('click', () => showIconInfo('coffee'));
+            
+            // 添加键盘快捷键支持
+            document.addEventListener('keydown', (e) => {
+                // Ctrl+C 复制接龙
+                if (e.ctrlKey && e.key === 'c') {
+                    e.preventDefault();
+                    copyToClipboard();
+                }
+                // Ctrl+R 重置
+                if (e.ctrlKey && e.key === 'r') {
+                    e.preventDefault();
+                    resetAllSelections();
+                }
+            });
+            
+            // 添加页面离开提示
+            window.addEventListener('beforeunload', (e) => {
+                // 检查是否有未保存的更改
+                const hasChanges = employeeStatus.some(status => 
+                    status[0] === 1 || status[1] === 1 || status[2] === 1
+                );
+                
+                if (hasChanges) {
+                    // 自动保存
+                    saveToLocalStorage();
+                }
+            });
+            
+            // 显示欢迎信息
+            setTimeout(() => {
+                const today = new Date();
+                const hour = today.getHours();
+                let greeting = '';
+                
+                if (hour < 12) greeting = '上午好';
+                else if (hour < 18) greeting = '下午好';
+                else greeting = '晚上好';
+                
+                console.log(`${greeting}！今天是${getCurrentDate()}，打卡第${getDayCount()}天`);
+            }, 1000);
+        }
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', initPage);
+    </script>
+</body>
+</html>
